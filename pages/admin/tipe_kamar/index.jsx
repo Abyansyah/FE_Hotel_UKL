@@ -1,8 +1,7 @@
 import { Delete, Modal, Sidebar } from 'ahmad/components';
 import { parseCookies } from 'nookies';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/router';
 
 const Tipe = ({ data }) => {
   const [showModal, setShowModal] = useState(false);
@@ -42,14 +41,14 @@ const Tipe = ({ data }) => {
     formData.append('harga', harga);
     formData.append('deskripsi', deskripsi);
     try {
-      await axios.post('http://localhost:8000/tipe/', formData, {
+      await axios.post(`${process.env.PORT}/tipe/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
       });
       setShowModal(false);
-      const response = await axios.get('http://localhost:8000/tipe', { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get(`${process.env.PORT}/tipe`, { headers: { Authorization: `Bearer ${token}` } });
       setHasil(response.data.data);
     } catch (error) {
       console.log(error);
@@ -61,7 +60,7 @@ const Tipe = ({ data }) => {
     setEdit(true);
     try {
       const { token } = parseCookies();
-      const response = await axios.get(`http://localhost:8000/tipe/${userId}`, {
+      const response = await axios.get(`${process.env.PORT}/tipe/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -86,14 +85,14 @@ const Tipe = ({ data }) => {
     formData.append('harga', harga);
     formData.append('deskripsi', deskripsi);
     try {
-      await axios.put(`http://localhost:8000/tipe/${tipeId}`, formData, {
+      await axios.put(`${process.env.PORT}/tipe/${tipeId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
       });
       setEdit(false);
-      const response = await axios.get('http://localhost:8000/tipe', { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get(`${process.env.PORT}/tipe`, { headers: { Authorization: `Bearer ${token}` } });
       setHasil(response.data.data);
     } catch (error) {
       console.log(error);
@@ -108,9 +107,9 @@ const Tipe = ({ data }) => {
   const deleteUser = async (id) => {
     const { token } = parseCookies();
     try {
-      await axios.delete(`http://localhost:8000/tipe/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`${process.env.PORT}/tipe/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       setDelete(false);
-      const response = await axios.get('http://localhost:8000/tipe', { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get(`${process.env.PORT}/tipe`, { headers: { Authorization: `Bearer ${token}` } });
       setHasil(response.data.data);
     } catch (error) {
       console.log(error.message);
@@ -542,7 +541,7 @@ export async function getServerSideProps(context) {
     };
   }
   try {
-    const response = await axios.get('http://localhost:8000/tipe', { headers: { Authorization: `Bearer ${token} ` } });
+    const response = await axios.get(`${process.env.PORT}/tipe`, { headers: { Authorization: `Bearer ${token} ` } });
     return { props: { data: response.data.data, token: token } };
   } catch (error) {
     console.error(error);

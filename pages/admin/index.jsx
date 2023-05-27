@@ -9,7 +9,7 @@ const Admin = () => {
   const getUser = async () => {
     const { token } = parseCookies();
     try {
-      const response = await axios.get('http://localhost:8000/user/getAll', { headers: { Authorization: `Bearer ${token} ` } });
+      const response = await axios.get(`${process.env.PORT}/user/getAll`, { headers: { Authorization: `Bearer ${token} ` } });
       const data = response.data;
       setUser(data.count);
     } catch (error) {

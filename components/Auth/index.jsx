@@ -11,7 +11,7 @@ const Auth = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8000/user/login', { email, password });
+      const response = await axios.post(`${process.env.PORT}/user/login`, { email, password });
       const cookieOptions = {
         maxAge: 30 * 24 * 60 * 60,
         path: '/',
