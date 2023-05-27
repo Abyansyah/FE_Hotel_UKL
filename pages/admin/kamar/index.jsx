@@ -25,7 +25,7 @@ const Kamar = ({ data }) => {
   const getTipeKamar = async () => {
     const { token } = parseCookies();
     try {
-      const response = await axios.get(`${process.env.PORT}/tipe`, { headers: { Authorization: `Bearer ${token} ` } });
+      const response = await axios.get('http://localhost:8000/tipe', { headers: { Authorization: `Bearer ${token} ` } });
       const data = response.data;
       setTipeKamarOptions(data.data);
     } catch (error) {
@@ -45,13 +45,13 @@ const Kamar = ({ data }) => {
       nama_tipe_kamar: tipeKamar,
     };
     try {
-      await axios.post(`${process.env.PORT}/kamar/`, data, {
+      await axios.post('http://localhost:8000/kamar/', data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       setShowModal(false);
-      const response = await axios.get(`${process.env.PORT}/kamar/`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('http://localhost:8000/kamar/', { headers: { Authorization: `Bearer ${token}` } });
       setHasil(response.data.data);
     } catch (error) {
       console.log(error);
@@ -63,7 +63,7 @@ const Kamar = ({ data }) => {
     setShowEdit(true);
     try {
       const { token } = parseCookies();
-      const response = await axios.get(`${process.env.PORT}/kamar/${userId}`, {
+      const response = await axios.get(`http://localhost:8000/kamar/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -85,13 +85,13 @@ const Kamar = ({ data }) => {
       nama_tipe_kamar: tipeKamar,
     };
     try {
-      await axios.put(`${process.env.PORT}/${kamarId}`, data, {
+      await axios.put(`http://localhost:8000/kamar/${kamarId}`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       setShowEdit(false);
-      const response = await axios.get(`${process.env.PORT}/kamar/`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('http://localhost:8000/kamar/', { headers: { Authorization: `Bearer ${token}` } });
       setHasil(response.data.data);
     } catch (error) {
       console.log(error);
@@ -106,9 +106,9 @@ const Kamar = ({ data }) => {
   const deleteUser = async (id) => {
     const { token } = parseCookies();
     try {
-      await axios.delete(`${process.env.PORT}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`http://localhost:8000/kamar/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       setDelete(false);
-      const response = await axios.get(`${process.env.PORT}/kamar`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('http://localhost:8000/kamar', { headers: { Authorization: `Bearer ${token}` } });
       setHasil(response.data.data);
     } catch (error) {
       console.log(error.message);
@@ -453,7 +453,7 @@ export async function getServerSideProps(context) {
     };
   }
   try {
-    const response = await axios.get(`${process.env.PORT}/kamar`, { headers: { Authorization: `Bearer ${token} ` } });
+    const response = await axios.get('http://localhost:8000/kamar', { headers: { Authorization: `Bearer ${token} ` } });
     return { props: { data: response.data.data, token: token } };
   } catch (error) {
     console.error(error);

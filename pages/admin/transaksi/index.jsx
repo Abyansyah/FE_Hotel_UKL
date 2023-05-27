@@ -42,7 +42,7 @@ const Transaksi = ({ data }) => {
   const getTipeKamar = async () => {
     const { token } = parseCookies();
     try {
-      const response = await axios.get(`${process.env.PORT}/tipe`, { headers: { Authorization: `Bearer ${token} ` } });
+      const response = await axios.get('http://localhost:8000/tipe', { headers: { Authorization: `Bearer ${token} ` } });
       const data = response.data;
       setTipeKamarOptions(data.data);
     } catch (error) {
@@ -59,13 +59,13 @@ const Transaksi = ({ data }) => {
     const { token } = parseCookies();
 
     try {
-      await axios.post(`${process.env.PORT}/pemesanan/`, formData, {
+      await axios.post('http://localhost:8000/pemesanan/', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       setShowModal(false);
-      const response = await axios.get(`${process.env.PORT}/pemesanan/`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('http://localhost:8000/pemesanan/', { headers: { Authorization: `Bearer ${token}` } });
       setHasil(response.data.data);
     } catch (error) {
       console.log(error);
@@ -77,7 +77,7 @@ const Transaksi = ({ data }) => {
     setIdStatus(id);
     try {
       const { token } = parseCookies();
-      const response = await axios.get(`${process.env.PORT}/pemesanan/${id}`, {
+      const response = await axios.get(`http://localhost:8000/pemesanan/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -96,13 +96,13 @@ const Transaksi = ({ data }) => {
       status_pemesanan: status,
     };
     try {
-      await axios.put(`${process.env.PORT}/pemesanan/status/${idStatus}`, data, {
+      await axios.put(`http://localhost:8000/pemesanan/status/${idStatus}`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       setShowEdit(false);
-      const response = await axios.get(`${process.env.PORT}/pemesanan/`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('http://localhost:8000/pemesanan/', { headers: { Authorization: `Bearer ${token}` } });
       setHasil(response.data.data);
     } catch (error) {
       console.log(error);
@@ -113,7 +113,7 @@ const Transaksi = ({ data }) => {
     setShowDetail(true);
     try {
       const { token } = parseCookies();
-      const response = await axios.get(`${process.env.PORT}/pemesanan/${id}`, {
+      const response = await axios.get(`http://localhost:8000/pemesanan/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -475,7 +475,7 @@ export async function getServerSideProps(context) {
     };
   }
   try {
-    const response = await axios.get(`${process.env.PORT}/pemesanan`, { headers: { Authorization: `Bearer ${token} ` } });
+    const response = await axios.get('http://localhost:8000/pemesanan', { headers: { Authorization: `Bearer ${token} ` } });
     return { props: { data: response.data.data, token: token } };
   } catch (error) {
     console.error(error);

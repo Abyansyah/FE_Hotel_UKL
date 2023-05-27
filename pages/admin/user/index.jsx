@@ -2,7 +2,6 @@ import { Delete, Sidebar } from 'ahmad/components';
 import { parseCookies } from 'nookies';
 import { useState } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/router';
 import { Modal } from 'ahmad/components';
 
 const Admin = ({ data }) => {
@@ -20,7 +19,6 @@ const Admin = ({ data }) => {
   const [userToDelete, setUserToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const { role } = parseCookies();
-  const router = useRouter();
 
   const loadImage = (e) => {
     const image = e.target.files[0];
@@ -48,14 +46,14 @@ const Admin = ({ data }) => {
     formData.append('password', password);
     formData.append('role', Role);
     try {
-      await axios.post(`${process.env.PORT}/user`, formData, {
+      await axios.post('http://localhost:8000/user', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
       });
       setShowModal(false);
-      const response = await axios.get(`${process.env.PORT}/user/getAll`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('http://localhost:8000/user/getAll', { headers: { Authorization: `Bearer ${token}` } });
       setHasil(response.data.data);
     } catch (error) {
       console.log(error);
@@ -67,7 +65,7 @@ const Admin = ({ data }) => {
     setShowModaledit(true);
     try {
       const { token } = parseCookies();
-      const response = await axios.get(`${process.env.PORT}/user/${userId}`, {
+      const response = await axios.get(`http://localhost:8000/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -93,14 +91,14 @@ const Admin = ({ data }) => {
     formData.append('password', password);
     formData.append('role', role);
     try {
-      await axios.put(`${process.env.PORT}/user/${editUserId}`, formData, {
+      await axios.put(`http://localhost:8000/user/${editUserId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
       });
       setShowModaledit(false);
-      const response = await axios.get(`${process.env.PORT}/user/getAll`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('http://localhost:8000/user/getAll', { headers: { Authorization: `Bearer ${token}` } });
       setHasil(response.data.data);
     } catch (error) {
       console.log(error);
@@ -115,9 +113,9 @@ const Admin = ({ data }) => {
   const deleteUser = async (id) => {
     const { token } = parseCookies();
     try {
-      await axios.delete(`${process.env.PORT}/user/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`http://localhost:8000/user/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       setDelete(false);
-      const response = await axios.get(`${process.env.PORT}/user/getAll`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('http://localhost:8000/user/getAll', { headers: { Authorization: `Bearer ${token}` } });
       setHasil(response.data.data);
     } catch (error) {
       console.log(error.message);
@@ -574,7 +572,7 @@ export async function getServerSideProps(context) {
     };
   }
   try {
-    const response = await axios.get(`${process.env.PORT}/user/getAll`, { headers: { Authorization: `Bearer ${token} ` } });
+    const response = await axios.get('http://localhost:8000/user/getAll', { headers: { Authorization: `Bearer ${token} ` } });
     return { props: { data: response.data.data, role: role, token: token } };
   } catch (error) {
     console.error(error);
