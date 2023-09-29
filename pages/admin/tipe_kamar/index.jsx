@@ -1,8 +1,7 @@
 import { Delete, Modal, Sidebar } from 'ahmad/components';
 import { parseCookies } from 'nookies';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/router';
 
 const Tipe = ({ data }) => {
   const [showModal, setShowModal] = useState(false);
@@ -532,8 +531,8 @@ const Tipe = ({ data }) => {
 export default Tipe;
 
 export async function getServerSideProps(context) {
-  const { token } = parseCookies(context);
-  if (!token) {
+  const { token, role } = parseCookies(context);
+  if (!token && role === 'tamu') {
     return {
       redirect: {
         destination: '/',

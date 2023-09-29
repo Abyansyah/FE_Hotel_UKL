@@ -1,6 +1,9 @@
 import Head from 'next/head';
-import { Auth } from 'ahmad/components';
+import { About, Auth, Facility, Footer, Header, Hero, Navbar } from 'ahmad/components';
 import { parseCookies } from 'nookies';
+import User from './user';
+import Image from 'next/image';
+import { LoginModal } from 'ahmad/components/Modal';
 
 export default function Home() {
   return (
@@ -12,16 +15,23 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
         <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.css" rel="stylesheet" />
       </Head>
-      <div>
-        <Auth />
-      </div>
+
+      <main>
+        <Navbar />
+        <Header />
+        {/* <LoginModal /> */}
+        <Hero />
+        <Facility />
+        <About />
+        <Footer />
+      </main>
     </>
   );
 }
 
 export async function getServerSideProps(context) {
-  const { token } = parseCookies(context);
-  if (token) {
+  const { token, role } = parseCookies(context);
+  if (token && role !== 'tamu') {
     return {
       redirect: {
         destination: '/admin',

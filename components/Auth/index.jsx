@@ -12,18 +12,27 @@ const Auth = () => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:8000/user/login', { email, password });
-      const cookieOptions = {
-        maxAge: 30 * 24 * 60 * 60,
-        path: '/',
-        overwrite: true,
-      };
-      setCookie(null, 'token', response.data.data.token, cookieOptions);
-      setCookie(null, 'role', response.data.data.role, cookieOptions);
-      setCookie(null, 'email', decodeURIComponent(response.data.data.email), cookieOptions);
-      setCookie(null, 'id', response.data.data.id_user, cookieOptions);
-      setCookie(null, 'nama', response.data.data.nama_user, cookieOptions);
-      setCookie(null, 'foto', response.data.data.foto, cookieOptions);
-      router.push('/admin');
+      if (response.status === 200) {
+        const cookieOptions = {
+          maxAge: 30 * 24 * 60 * 60,
+          path: '/',
+          overwrite: true,
+        };
+        close();
+        setCookie(null, 'token', response.data.data.token, cookieOptions);
+        setCookie(null, 'role', response.data.data.role, cookieOptions);
+        setCookie(null, 'email', decodeURIComponent(response.data.data.email), cookieOptions);
+        setCookie(null, 'id', response.data.data.id_user, cookieOptions);
+        setCookie(null, 'nama', response.data.data.nama_user, cookieOptions);
+        setCookie(null, 'foto', response.data.data.foto, cookieOptions);
+        setEmail('');
+        setPassword('');
+        if (response?.data?.data?.role === 'admin') {
+          router.push('/admin');
+        } else {
+          router.push('/');
+        }
+      }
     } catch (error) {
       if (error.response && error.response.status === 404) {
         alert('User tidak ditemukan');
@@ -41,7 +50,6 @@ const Auth = () => {
         <div class="bg-blue-600 hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
           <img src="/image/bg.jpg" alt="" class="w-full h-full object-cover" />
         </div>
-
         <div
           class="bg-white w-full md:max-w-md lg:max-w-full md:mx-auto md:mx-0 md:w-1/2 xl:w-1/3 h-screen px-6 lg:px-16 xl:px-12
       flex items-center justify-center"
@@ -66,7 +74,6 @@ const Auth = () => {
                   required
                 />
               </div>
-
               <div class="mt-4">
                 <label class="block text-gray-700">Password</label>
                 <input

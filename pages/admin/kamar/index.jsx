@@ -14,7 +14,31 @@ const Kamar = ({ data }) => {
   const [kamarId, setKamarId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [tipeKamarOptions, setTipeKamarOptions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { role } = parseCookies();
+  const [isClient, setIsClient] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
+  const [paginatedData, setPaginatedData] = useState([]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const dataSlice = hasil.slice(startIndex, endIndex);
+    setPaginatedData(dataSlice);
+
+    const totalPagesCount = Math.ceil(hasil.length / rowsPerPage);
+    setTotalPages(totalPagesCount);
+  }, [hasil, currentPage, rowsPerPage]);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleAdd = () => {
     setShowModal(true);
@@ -28,6 +52,7 @@ const Kamar = ({ data }) => {
       const response = await axios.get('http://localhost:8000/tipe', { headers: { Authorization: `Bearer ${token} ` } });
       const data = response.data;
       setTipeKamarOptions(data.data);
+      setIsLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -205,7 +230,7 @@ const Kamar = ({ data }) => {
                 </div>
               </div>
               <div class="flex items-center ml-auto space-x-2 sm:space-x-3">
-                {role === 'admin' ? (
+                {role === 'admin' && isClient ? (
                   <button
                     type="button"
                     onClick={() => handleAdd()}
@@ -239,7 +264,7 @@ const Kamar = ({ data }) => {
           <div class="overflow-x-auto">
             <div class="inline-block min-w-full align-middle">
               <div class="overflow-hidden shadow">
-                <table class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-600">
+                <table class="min-w-full divide-y overflow-y-hidden divide-gray-200 table-fixed dark:divide-gray-600">
                   <thead class="bg-gray-100 dark:bg-gray-700">
                     <tr>
                       <th scope="col" class="p-4">
@@ -251,7 +276,7 @@ const Kamar = ({ data }) => {
                       <th scope="col" class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">
                         Tipe Kamar
                       </th>
-                      {role === 'admin' ? (
+                      {role === 'admin' && isClient ? (
                         <th scope="col" class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">
                           Actions
                         </th>
@@ -259,7 +284,13 @@ const Kamar = ({ data }) => {
                     </tr>
                   </thead>
                   <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                    {hasil.length === 0 ? (
+                    {isLoading && isClient ? (
+                      <tr>
+                        <td colSpan="5" class="p-4 text-center font-normal text-gray-900 whitespace-nowrap dark:text-white">
+                          <div class="px-3 py-1 text-xs font-medium leading-none text-center text-blue-800 bg-blue-200 rounded-full animate-pulse dark:bg-blue-900 dark:text-blue-200">loading...</div>
+                        </td>
+                      </tr>
+                    ) : paginatedData.length === 0 ? (
                       <tr>
                         <td colSpan="5" class="p-4 text-center font-normal text-gray-900 whitespace-nowrap dark:text-white">
                           Kamar not found
@@ -267,12 +298,12 @@ const Kamar = ({ data }) => {
                       </tr>
                     ) : (
                       <>
-                        {hasil.map((tipe, index) => (
+                        {paginatedData.map((tipe, index) => (
                           <tr class="hover:bg-gray-100 dark:hover:bg-gray-700 " key={index}>
                             <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">{index + 1}</td>
                             <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">Nomor - {tipe.nomor_kamar}</td>
                             <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">{tipe.tipe_kamar.nama_tipe_kamar}</td>
-                            {role === 'admin' ? (
+                            {role === 'admin' && isClient ? (
                               <td class="p-4 space-x-2 whitespace-nowrap">
                                 <button
                                   type="button"
@@ -308,6 +339,37 @@ const Kamar = ({ data }) => {
                       </>
                     )}
                   </tbody>
+                  <div className="py-3 flex justify-end border-t border-gray-200">
+                    <div className="hidden justify-end sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                      <div>
+                        <nav className="relative z-0 inline-flex items-center gap-4 rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                          <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            className={`relative inline-flex items-center px-2 py-2 rounded-l-md border ${currentPage === 1 ? 'border-gray-300 text-gray-400' : 'border-gray-300 hover:border-gray-400'} bg-white text-sm font-medium ${
+                              currentPage === 1 ? 'text-gray-400' : 'text-gray-500 hover:bg-gray-50'
+                            }`}
+                            disabled={currentPage === 1}
+                          >
+                            <span className="sr-only">Next</span>
+                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fillRule="evenodd" d="M10.707 5.293a1 1 0 010 1.414L8.414 9H14a1 1 0 110 2H8.414l2.293 2.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                          <div>
+                            <p className="text-sm text-gray-400">
+                              Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{totalPages}</span>
+                            </p>
+                          </div>
+                          <button onClick={() => handlePageChange(currentPage + 1)} className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span className="sr-only">Previous</span>
+                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fillRule="evenodd" d="M9.293 14.293a1 1 0 010-1.414L11.586 11H6a1 1 0 010-2h5.586l-2.293-2.293a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </nav>
+                      </div>
+                    </div>
+                  </div>
                 </table>
               </div>
             </div>
@@ -443,8 +505,8 @@ const Kamar = ({ data }) => {
 export default Kamar;
 
 export async function getServerSideProps(context) {
-  const { token } = parseCookies(context);
-  if (!token) {
+  const { token, role } = parseCookies(context);
+  if (!token && role === 'tamu') {
     return {
       redirect: {
         destination: '/',

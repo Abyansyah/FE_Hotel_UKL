@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Private Workspace",
+    "img": "/icons/Group.svg"
+  },
+  {
+    "name": "Parking Area",
+    "img": "/icons/parking-area.svg"
+  },
+  {
+    "name": "Breakfast",
+    "img": "/icons/cappuccino.svg"
+  },
+  {
+    "name": "Free Wifi",
+    "img": "/icons/Wifi.svg"
+  },
+  {
+    "name": "Free Electricity",
+    "img": "/icons/flash.svg"
+  },
+  {
+    "name": "Swimming Pool",
+    "img": "/icons/swimmer.svg"
+  },
+  {
+    "name": "exercise Space",
+    "img": "/icons/dumbell.svg"
+  },
+  {
+    "name": "Other Service",
+    "img": "/icons/ellipsis.svg"
+  }
+]
