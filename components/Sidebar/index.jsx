@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { destroyCookie, parseCookies } from 'nookies';
+import Image from 'next/image';
 
 const Sidebar = ({ children }) => {
   const router = useRouter();
@@ -33,6 +34,7 @@ const Sidebar = ({ children }) => {
   };
   return (
     <>
+      <Image src={'/logo/king.svg'} width={200} height={40} alt="logo" />
       <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
         <div class="px-3 py-3 lg:px-5 lg:pl-3">
           <div class="flex items-center justify-between">

@@ -71,7 +71,7 @@ export default Admin;
 
 export async function getServerSideProps(context) {
   const { token, role } = parseCookies(context);
-  if (!token && role !== 'admin') {
+  if (!token && role === 'tamu') {
     return {
       redirect: {
         destination: '/',

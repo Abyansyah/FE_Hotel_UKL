@@ -4,10 +4,13 @@ import 'react-date-range/dist/styles.css'; // main style file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import { DateRangePicker } from 'react-date-range';
 import { useRouter } from 'next/router';
+import moment from 'moment';
+import { useDateRange } from 'ahmad/context/datePicker';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Header = () => {
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const { startDate, setStartDate, endDate, setEndDate } = useDateRange();
   const [showDate, setShowDate] = useState(false);
   const dateRangeRef = useRef(null);
   const router = useRouter();
@@ -16,6 +19,11 @@ const Header = () => {
     setStartDate(ranges.selection.startDate);
     setEndDate(ranges.selection.endDate);
   };
+
+  useEffect(() => {
+    if (startDate === endDate) {
+    }
+  }, [startDate, endDate]);
 
   useEffect(() => {
     const nextDay = new Date(startDate);
@@ -43,8 +51,6 @@ const Header = () => {
     key: 'selection',
   };
 
-  console.log(startDate.toLocaleDateString());
-
   return (
     <>
       <main className="flex relative justify-center mt-28">
@@ -63,7 +69,7 @@ const Header = () => {
                 <BsCalendarEventFill color="#3B82F6" className="mt-2" />
                 <div className="flex flex-col">
                   <h2 className="font-normal text-[#222] text-lg">Check In</h2>
-                  <p className="text-[#555555]">{startDate.toLocaleDateString()}</p>
+                  <p className="text-[#555555]">{moment(startDate).format('ddd, DD MMM')}</p>
                 </div>
               </div>
               <div className="w-[1px] h-[60px] bg-[#E8E8E8]"></div>
@@ -71,16 +77,17 @@ const Header = () => {
                 <BsCalendarEventFill color="#3B82F6" className="mt-2" />
                 <div className="flex flex-col">
                   <h2 className="font-normal text-[#222] text-lg">Check Out</h2>
-                  <p className="text-[#555555]">{endDate.toLocaleDateString()}</p>
+                  <p className="text-[#555555]">{moment(endDate).format('ddd, DD MMM')}</p>
                 </div>
               </div>
             </div>
             <button
               onClick={(e) => {
                 e.preventDefault;
-                router.push(`/hotel/?tgl_check_in=${startDate.toLocaleDateString()}&tgl_check_out=${endDate.toLocaleDateString()}`);
+                router.push(`/hotel/?tgl_check_in=${moment(startDate).format('YYYY-MM-DD')}&tgl_check_out=${moment(endDate).format('YYYY-MM-DD')}`);
               }}
-              className="flex gap-x-3 items-center p-4 bg-blue-700 rounded-full"
+              disabled={startDate === endDate}
+              className={`flex gap-x-3 items-center p-4 bg-blue-700 rounded-full ${startDate === endDate ? 'cursor-default' : ''}`}
             >
               <BsSearch color="#fff" />
               <p className="text-white">Search...</p>

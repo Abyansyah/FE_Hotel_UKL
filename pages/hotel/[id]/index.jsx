@@ -5,17 +5,53 @@ import { useEffect, useState } from 'react';
 import { MdKeyboardArrowRight } from 'react-icons/md';
 import { parseCookies } from 'nookies';
 import { LoginModal } from 'ahmad/components/Modal';
+import { useRouter } from 'next/router';
+import axios from 'axios';
+import { useDateRange } from 'ahmad/context/datePicker';
+import moment from 'moment';
 
 const ProductDeks = () => {
-  const { token } = parseCookies();
+  const { startDate, setStartDate, endDate, setEndDate } = useDateRange();
+  const [tipe, setTipe] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [numberMax, setNumberMax] = useState(null);
+  const router = useRouter();
+  const { token } = parseCookies();
+  const { id } = router.query;
+  const { tgl_check_in, tgl_check_out } = router.query;
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    setStartDate(tgl_check_in);
+    setEndDate(tgl_check_out);
+  }, [tgl_check_in, tgl_check_out]);
 
   const getTipeKamar = async () => {
     const { token } = parseCookies();
+    setIsLoading(true);
     try {
-      const response = await axios.get('http://localhost:8000/kamar', { headers: { Authorization: `Bearer ${token} ` } });
+      const response = await axios.get(`http://localhost:8000/tipe/${id}`, { headers: { Authorization: `Bearer ${token} ` } });
       const data = response.data;
-      setTipeKamarOptions(data.data);
+      setTipe(data.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getNomorKamar = async () => {
+    const { token } = parseCookies();
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:8000/kamar/findByTipe/${id}?tgl_check_in=${tgl_check_in}&tgl_check_out=${tgl_check_out}`, { headers: { Authorization: `Bearer ${token} ` } });
+      const data = response.data;
+      console.log(data);
+      setNumberMax(data.data);
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -24,28 +60,37 @@ const ProductDeks = () => {
 
   useEffect(() => {
     getTipeKamar();
-  }, []);
+    getNomorKamar();
+  }, [id]);
+
+  const formatIDR = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+    }).format(amount);
+  };
+
   return (
     <>
       <Navbar />
       <div className="pt-28 mx-44">
         <div className="flex flex-col">
           <div className="flex gap-2 items-center">
-            <Link href={'/'} className="text-xs text-blue-600">
+            <button onClick={() => router.push('/')} className="text-xs text-blue-600">
               Home{' '}
-            </Link>
+            </button>
             <MdKeyboardArrowRight />
-            <Link href={'/'} className="text-xs text-blue-600">
+            <button onClick={() => router.back()} className="text-xs text-blue-600">
               Hotel{' '}
-            </Link>
+            </button>
             <MdKeyboardArrowRight />
-            <p className="text-xs text-[#4c515a]">Urbanview Hotel Anna Kuta Inn Bali</p>
+            <p className="text-xs text-[#4c515a]">{tipe?.nama_tipe_kamar}</p>
           </div>
           <div className="flex gap-2 mt-4">
-            <Image className="rounded-l-lg" src={'/image/bg2.jpg'} width={580} height={403} alt="Image" />
+            <Image className="rounded-l-lg w-[580px] object-cover h-[386px]" src={`http://localhost:8000/foto_tipe_kamar/${tipe?.foto}`} width={580} height={403} alt="Image" />
             <div className="flex flex-col gap-2">
-              <Image className="" src={'/image/bg2.jpg'} width={284} height={202} alt="Image" />
-              <Image className="" src={'/image/bg2.jpg'} width={284} height={202} alt="Image" />
+              <Image className="w-[284px] h-[190px] object-cover" src={'https://source.unsplash.com/random/?hotel'} width={284} height={202} alt="Image" />
+              <Image className="w-[284px] h-[190px] object-contain" src={'https://source.unsplash.com/random/?mattress'} width={284} height={202} alt="Image" />
             </div>
             <div className="flex flex-col gap-2">
               <Image className="  rounded-tr-lg" src={'/image/bg2.jpg'} width={284} height={202} alt="Image" />
@@ -55,7 +100,7 @@ const ProductDeks = () => {
           <div className="flex pt-4 justify-between">
             <div className="w-7/12">
               <div className="flex flex-col gap-y-4">
-                <h1 className="text-3xl font-semibold">Urbanview Hotel Anna Kuta Inn Bali</h1>
+                <h1 className="text-3xl font-semibold">{tipe?.nama_tipe_kamar}</h1>
                 <p className="text-base text-gray-800">Jalan Poppies II, Jalan Poppies II, No.6, Kuta, Kecamatan Kuta, Kuta, Indonesia, 80361</p>
               </div>
               <div className="w-full bg-[#303030]"></div>
@@ -118,17 +163,17 @@ const ProductDeks = () => {
               </div>
             </div>
             <div className="p-5 w-[300px] h-min shadow-2xl rounded-md">
-              <h1 className="text-2xl text-[#303030] font-semibold">Rp 249.200</h1>
+              <h1 className="text-2xl text-[#303030] font-semibold">{formatIDR(tipe?.harga)}</h1>
               <div className="border border-[#ddd] mt-5  rounded-lg">
                 <div className="flex p-4 justify-between items-center">
                   <div>
                     <p className="text-sm text-[#303030] font-semibold">Check In </p>
-                    <p className="text-base text-[#303030] font-normal">Sun, 17 Sep</p>
+                    <p className="text-base text-[#303030] font-normal">{moment(startDate).format('ddd, DD MMM')}</p>
                   </div>
                   <div className="w-[1px] h-[34px] bg-[#ddd]"></div>
                   <div>
                     <p className="text-sm text-[#303030] font-semibold">Check In </p>
-                    <p className="text-base text-[#303030] font-normal">Sun, 17 Sep</p>
+                    <p className="text-base text-[#303030] font-normal">{moment(endDate).format('ddd, DD MMM')}</p>
                   </div>
                 </div>
                 <div className="w-full h-[1px] bg-[#ddd]"></div>
@@ -141,14 +186,14 @@ const ProductDeks = () => {
               </div>
               <div className="border border-[#ddd] mt-3 p-3 rounded-lg">
                 <p className="text-sm text-[#303030] font-semibold">Tipe Kamar</p>
-                <p className="text-base text-[#303030] font-normal">Eksekutif</p>
+                <p className="text-base text-[#303030] font-normal">{tipe?.nama_tipe_kamar}</p>
               </div>
               <div className="flex justify-between my-3">
                 <p className="text-sm text-[#303030] font-medium">Total harga</p>
-                <p className="text-sm text-[#303030] font-medium">Rp 248.235</p>
+                <p className="text-sm text-[#303030] font-medium">{formatIDR(tipe?.harga)}</p>
               </div>
-              <button onClick={!token ? () => setShowModal(true) : null} className="bg-blue-600 text-white py-3 w-full rounded-md">
-                {!token ? 'Login' : 'Pesan Sekarang'}
+              <button disabled={numberMax === null ? true : false} onClick={() => router.push(`/booking/${tipe?.id}?tgl_check_in=${tgl_check_in}&tgl_check_out=${tgl_check_out}`)} className="bg-blue-600 text-white py-3 w-full rounded-md">
+                Pesan Sekarang
               </button>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { Modal } from 'ahmad/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProfile } from 'ahmad/config/slices/user';
 import { RootState } from 'ahmad/config/reducers';
+import { Flip, ToastContainer, toast } from 'react-toastify';
 
 const Admin = ({ data }) => {
   const [showModal, setShowModal] = useState(false);
@@ -36,8 +37,32 @@ const Admin = ({ data }) => {
 
   const loadImage = (e) => {
     const image = e.target.files[0];
-    setFoto(image);
-    setPrev(URL.createObjectURL(image));
+
+    if (image) {
+      const allowedFormats = ['image/png', 'image/jpeg', 'image/jpg'];
+      const maxSize = 1 * 1024 * 1024;
+
+      if (allowedFormats.includes(image.type) && image.size <= maxSize) {
+        setFoto(image);
+        setPrev(URL.createObjectURL(image));
+      } else {
+        let message = 'Please select a PNG, JPEG, or JPG file.';
+        if (image.size > maxSize) {
+          message = 'file maximum (1 MB).';
+        }
+        toast.warn(`${message}`, {
+          position: 'top-center',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: 'dark',
+        });
+        e.target.value = '';
+      }
+    }
   };
 
   useEffect(() => {
@@ -55,6 +80,15 @@ const Admin = ({ data }) => {
 
     getUser();
   }, []);
+
+  const handleClearState = () => {
+    setNama('');
+    setFoto('');
+    setEmail('');
+    setPassword('');
+    setRole('');
+    setPrev('');
+  };
 
   const handleAdd = () => {
     setShowModal(true);
@@ -102,10 +136,10 @@ const Admin = ({ data }) => {
         },
       });
       const userData = response.data.data;
-      console.log(userData);
       setNama(userData.nama_user);
       setFoto(userData.foto);
       setEmail(userData.email);
+      setPrev(userData.foto);
       setRole(userData.role);
     } catch (error) {
       console.log(error);
@@ -120,7 +154,7 @@ const Admin = ({ data }) => {
     formData.append('foto', foto);
     formData.append('email', email);
     formData.append('password', password);
-    formData.append('role', role);
+    formData.append('role', Role);
     try {
       await axios.put(`http://localhost:8000/user/${editUserId}`, formData, {
         headers: {
@@ -163,26 +197,27 @@ const Admin = ({ data }) => {
 
   return (
     <>
+      <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover={false} theme="dark" transition={Flip} />
       <Sidebar>
         <div className="p-4 bg-white block sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700">
           <div classNameName="w-full mb-1">
             <div classNameName="mb-4">
-              <nav classNameName="flex mb-5" aria-label="Breadcrumb">
-                <ol classNameName="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
-                  <li classNameName="inline-flex items-center">
-                    <a href="#" className="inline-flex items-center text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-white">
-                      <svg className="w-5 h-5 mr-2.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <nav class="flex mb-5" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
+                  <li class="inline-flex items-center">
+                    <a href="#" class="inline-flex items-center text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-white">
+                      <svg class="w-5 h-5 mr-2.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
                       </svg>
                       Home
                     </a>
                   </li>
                   <li>
-                    <div className="flex items-center">
-                      <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <div class="flex items-center">
+                      <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                       </svg>
-                      <a href="#" className="ml-1 text-gray-700 hover:text-primary-600 md:ml-2 dark:text-gray-300 dark:hover:text-white">
+                      <a href="#" class="ml-1 text-gray-700 hover:text-primary-600 md:ml-2 dark:text-gray-300 dark:hover:text-white">
                         Users
                       </a>
                     </div>
@@ -191,7 +226,7 @@ const Admin = ({ data }) => {
               </nav>
               <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">All users</h1>
             </div>
-            <div className="sm:flex">
+            <div className="sm:flex justify-between">
               <div className="items-center hidden mb-3 sm:flex sm:divide-x sm:divide-gray-100 sm:mb-0 dark:divide-gray-700">
                 <form className="lg:pr-3" action="#" method="GET">
                   <label for="users-search" className="sr-only">
@@ -209,7 +244,7 @@ const Admin = ({ data }) => {
                     />
                   </div>
                 </form>
-                <div className="flex pl-0 mt-3 space-x-1 sm:pl-2 sm:mt-0">
+                {/* <div className="flex pl-0 mt-3 space-x-1 sm:pl-2 sm:mt-0">
                   <a href="#" className="inline-flex justify-center p-1 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                       <path
@@ -238,7 +273,7 @@ const Admin = ({ data }) => {
                       <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
                     </svg>
                   </a>
-                </div>
+                </div> */}
               </div>
               <div className="flex items-center ml-auto space-x-2 sm:space-x-3">
                 {role === 'admin' && isClient ? (
@@ -253,20 +288,6 @@ const Admin = ({ data }) => {
                     Add user
                   </button>
                 ) : null}
-
-                <a
-                  href="#"
-                  className="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700"
-                >
-                  <svg className="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      fill-rule="evenodd"
-                      d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z"
-                      clip-rule="evenodd"
-                    ></path>
-                  </svg>
-                  Export
-                </a>
               </div>
             </div>
           </div>
@@ -365,7 +386,14 @@ const Admin = ({ data }) => {
       </Sidebar>
 
       {/* Add Modal */}
-      <Modal isVisible={showModal} close={() => setShowModal(false)} judul={'add User'}>
+      <Modal
+        isVisible={showModal}
+        close={() => {
+          setShowModal(false);
+          handleClearState();
+        }}
+        judul={'add User'}
+      >
         <form onSubmit={saveProduct}>
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-6 gap-6">
@@ -436,7 +464,7 @@ const Admin = ({ data }) => {
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     {prev ? (
                       <div classNameName="flex ">
-                        <img src={prev} alt="Prev Image" width={150} classNameName="object-cover" />
+                        <img src={prev} alt="Prev Image" width={150} className="object-cover h-60" />
                       </div>
                     ) : (
                       <>
@@ -444,9 +472,9 @@ const Admin = ({ data }) => {
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                         </svg>
                         <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="font-semibold">Click to upload</span> or drag and drop
+                          <span className="font-semibold">Click to upload</span>
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">JPEG, PNG, JPG (MAX. 1MB)</p>
                       </>
                     )}
                   </div>
@@ -458,8 +486,9 @@ const Admin = ({ data }) => {
 
           <div className="items-center p-6 border-t border-gray-200 rounded-b dark:border-gray-700">
             <button
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 disabled:bg-slate-600 disabled:text-zinc-200"
               type="submit"
+              disabled={!nama || !Role || !email || !password || !foto}
             >
               Add user
             </button>
@@ -468,7 +497,14 @@ const Admin = ({ data }) => {
       </Modal>
 
       {/* Edit Modal */}
-      <Modal isVisible={showModaledit} close={() => setShowModaledit(false)} judul={'update User'}>
+      <Modal
+        isVisible={showModaledit}
+        close={() => {
+          setShowModaledit(false);
+          handleClearState();
+        }}
+        judul={'update User'}
+      >
         <form onSubmit={editProduct}>
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-6 gap-6">
@@ -538,7 +574,7 @@ const Admin = ({ data }) => {
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     {prev ? (
                       <div classNameName="flex ">
-                        <img src={prev} alt="Prev Image" width={150} classNameName="object-cover" />
+                        <img src={`http://localhost:8000/foto_user/${prev}`} alt="Prev Image" width={150} className="object-cover h-60" />
                       </div>
                     ) : (
                       <>
@@ -546,9 +582,9 @@ const Admin = ({ data }) => {
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                         </svg>
                         <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="font-semibold">Click to upload</span> or drag and drop
+                          <span className="font-semibold">Click to upload</span>
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">JPEG, PNG, JPG (MAX. 1MB)</p>
                       </>
                     )}
                   </div>

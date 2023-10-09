@@ -2,13 +2,23 @@ import axios from 'axios';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { setCookie } from 'nookies';
+import Image from 'next/image';
+import Link from 'next/link';
+import { ToastContainer, toast, Flip } from 'react-toastify';
 
 const Auth = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isPass, setIsPass] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
+    if (password.length < 8) {
+      setIsPass('Kata sandi terlalu pendek');
+      return;
+    }
+    setIsLoading(true);
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:8000/user/login', { email, password });
@@ -29,38 +39,53 @@ const Auth = () => {
         setPassword('');
         if (response?.data?.data?.role === 'admin') {
           router.push('/admin');
+          setIsLoading(false);
         } else {
           router.push('/');
+          setIsLoading(false);
         }
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        alert('User tidak ditemukan');
         setEmail('');
         setPassword('');
+        setIsLoading(false);
+        toast.error(`User tidak ditemukan`, {
+          position: 'top-center',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: 'colored',
+        });
       } else {
         console.log('error', error);
+        setIsLoading(false);
       }
     }
   };
 
   return (
     <>
-      <section class="flex flex-col md:flex-row h-screen items-center">
-        <div class="bg-blue-600 hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
-          <img src="/image/bg.jpg" alt="" class="w-full h-full object-cover" />
+      <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover={false} theme="dark" transition={Flip} />
+
+      <section className="flex flex-col md:flex-row h-screen items-center">
+        <div className="bg-blue-600 hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
+          <img src="/image/bg.jpg" alt="" className="w-full h-full object-cover" />
         </div>
         <div
-          class="bg-white w-full md:max-w-md lg:max-w-full md:mx-auto md:mx-0 md:w-1/2 xl:w-1/3 h-screen px-6 lg:px-16 xl:px-12
+          className="bg-white w-full md:max-w-md lg:max-w-full md:mx-auto md:mx-0 md:w-1/2 xl:w-1/3 h-screen px-6 lg:px-16 xl:px-12
       flex items-center justify-center"
         >
-          <div class="w-full h-100">
-            <h1 class="text-xl font-bold">Tailwind Login</h1>
-            <h1 class="text-xl md:text-2xl font-bold leading-tight mt-12">Log in to your account</h1>
+          <div className="w-full h-100">
+            <Image src={'/logo/king.svg'} width={300} height={100} />
+            <h1 className="text-xl md:text-2xl font-bold leading-tight mt-3">Log account</h1>
 
-            <form class="mt-6" onSubmit={handleSubmit}>
+            <form className="mt-6" onSubmit={handleSubmit}>
               <div>
-                <label class="block text-gray-700">Email Address</label>
+                <label className="block text-gray-700">Email Address</label>
                 <input
                   type="email"
                   name=""
@@ -68,50 +93,55 @@ const Auth = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter Email Address"
-                  class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
+                  className="w-full px-4 py-3 rounded-lg mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
                   autofocus
                   autocomplete
                   required
                 />
               </div>
-              <div class="mt-4">
-                <label class="block text-gray-700">Password</label>
+              <div className="mt-4">
+                <label className="block text-gray-700">Password</label>
                 <input
                   type="password"
                   name=""
                   id=""
                   placeholder="Enter Password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500
-              focus:bg-white focus:outline-none"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setIsPass('');
+                  }}
+                  className={`w-full px-4 py-3 rounded-lg mt-2 border focus:border-blue-500
+                  focus:bg-white focus:outline-none ${isPass === 'Kata sandi terlalu pendek' ? 'border-red-600 focus:border-red-600' : null} `}
                   required
                 />
+                {isPass === 'Kata sandi terlalu pendek' ? <p className="text-red-600 mt-2 text-sm">{isPass}</p> : null}
               </div>
 
-              <div class="text-right mt-2">
-                <a href="#" class="text-sm font-semibold text-gray-700 hover:text-blue-700 focus:text-blue-700">
+              <div className="text-right mt-2">
+                <a href="#" className="text-sm font-semibold text-gray-700 hover:text-blue-700 focus:text-blue-700">
                   Forgot Password?
                 </a>
               </div>
 
               <button
                 type="submit"
-                class="w-full block bg-blue-500 hover:bg-blue-400 focus:bg-blue-400 text-white font-semibold rounded-lg
-            px-4 py-3 mt-6"
+                disabled={!email || !password || password.length < 8}
+                className="w-full block bg-blue-500 hover:bg-blue-400 focus:bg-blue-400 text-white font-semibold rounded-lg
+            px-4 py-3 mt-6 disabled:bg-gray-500 disabled:text-gray-200"
               >
-                Log In
+                {isLoading ? 'Loading...' : 'Log In'}
               </button>
             </form>
 
-            <hr class="my-6 border-gray-300 w-full" />
+            <hr className="my-6 border-gray-300 w-full" />
 
-            <p class="mt-8">
-              Need an account?
-              <a href="#" class="text-blue-500 hover:text-blue-700 font-semibold">
+            <div className="flex justify-center gap-x-3">
+              <p>Need an account?</p>
+              <Link href="/register" className="text-blue-500 hover:text-blue-700 font-semibold">
                 Create an account
-              </a>
-            </p>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

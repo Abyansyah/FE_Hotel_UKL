@@ -5,12 +5,15 @@ import { useState, useEffect } from 'react';
 import 'nprogress/nprogress.css';
 import { Provider } from 'react-redux';
 import store from 'ahmad/config/store';
+import { DateRangeProvider } from 'ahmad/context/datePicker';
 
 export default function App({ Component, pageProps }) {
   return (
     <>
       <Provider store={store}>
-        <Component {...pageProps} />
+        <DateRangeProvider>
+          <Component {...pageProps} />
+        </DateRangeProvider>
       </Provider>
     </>
   );

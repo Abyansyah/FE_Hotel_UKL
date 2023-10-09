@@ -1,7 +1,10 @@
 import { Delete, Modal, Sidebar } from 'ahmad/components';
 import { parseCookies } from 'nookies';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+import NumberFormat from 'react-number-format';
+import { CurrencyInput } from 'ahmad/components/CurrencyInput';
+import { Flip, ToastContainer, toast } from 'react-toastify';
 
 const Tipe = ({ data }) => {
   const [showModal, setShowModal] = useState(false);
@@ -9,18 +12,54 @@ const Tipe = ({ data }) => {
   const [showDelete, setDelete] = useState(false);
   const [hasil, setHasil] = useState(data);
   const [nama, setNama] = useState('');
-  const [harga, setHarga] = useState('');
+  const [harga, setHarga] = useState(0);
   const [deskripsi, setDeskripsi] = useState('');
   const [foto, setFoto] = useState('');
   const [tipeId, settipeId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [prev, setPrev] = useState('');
   const { role } = parseCookies();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const loadImage = (e) => {
     const image = e.target.files[0];
-    setFoto(image);
-    setPrev(URL.createObjectURL(image));
+
+    if (image) {
+      const allowedFormats = ['image/png', 'image/jpeg', 'image/jpg'];
+      const maxSize = 1 * 1024 * 1024;
+
+      if (allowedFormats.includes(image.type) && image.size <= maxSize) {
+        setFoto(image);
+        setPrev(URL.createObjectURL(image));
+      } else {
+        let message = 'Please select a PNG, JPEG, or JPG file.';
+        if (image.size > maxSize) {
+          message = 'file maximum (1 MB).';
+        }
+        toast.warn(`${message}`, {
+          position: 'top-center',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: 'dark',
+        });
+        e.target.value = '';
+      }
+    }
+  };
+
+  const handleClearState = () => {
+    setNama('');
+    setFoto('');
+    setHarga('');
+    setDeskripsi('');
   };
 
   const handleAdd = () => {
@@ -33,7 +72,6 @@ const Tipe = ({ data }) => {
 
   const saveProduct = async (e) => {
     e.preventDefault();
-    console.log('tes');
     const formData = new FormData();
     const { token } = parseCookies();
     formData.append('nama_tipe_kamar', nama);
@@ -66,10 +104,10 @@ const Tipe = ({ data }) => {
         },
       });
       const userData = response.data.data;
-      console.log(userData);
       setNama(userData.nama_tipe_kamar);
       setFoto(userData.foto);
       setHarga(userData.harga);
+      setPrev(userData.foto);
       setDeskripsi(userData.deskripsi);
     } catch (error) {
       console.log(error);
@@ -132,6 +170,7 @@ const Tipe = ({ data }) => {
   };
   return (
     <>
+      <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover={false} theme="dark" transition={Flip} />
       <Sidebar>
         <div class="p-4 bg-white block sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700">
           <div class="w-full mb-1">
@@ -178,39 +217,9 @@ const Tipe = ({ data }) => {
                     />
                   </div>
                 </form>
-                <div class="flex pl-0 mt-3 space-x-1 sm:pl-2 sm:mt-0">
-                  <a href="#" class="inline-flex justify-center p-1 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        fill-rule="evenodd"
-                        d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                        clip-rule="evenodd"
-                      ></path>
-                    </svg>
-                  </a>
-                  <a href="#" class="inline-flex justify-center p-1 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        fill-rule="evenodd"
-                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                        clip-rule="evenodd"
-                      ></path>
-                    </svg>
-                  </a>
-                  <a href="#" class="inline-flex justify-center p-1 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                    </svg>
-                  </a>
-                  <a href="#" class="inline-flex justify-center p-1 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
-                    </svg>
-                  </a>
-                </div>
               </div>
               <div class="flex items-center ml-auto space-x-2 sm:space-x-3">
-                {role === 'admin' ? (
+                {role === 'admin' && isClient ? (
                   <button
                     type="button"
                     onClick={() => handleAdd()}
@@ -222,19 +231,6 @@ const Tipe = ({ data }) => {
                     Add Tipe
                   </button>
                 ) : null}
-                <a
-                  href="#"
-                  class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700"
-                >
-                  <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      fill-rule="evenodd"
-                      d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z"
-                      clip-rule="evenodd"
-                    ></path>
-                  </svg>
-                  Export
-                </a>
               </div>
             </div>
           </div>
@@ -259,7 +255,7 @@ const Tipe = ({ data }) => {
                       <th scope="col" class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">
                         Deskripsi
                       </th>
-                      {role === 'admin' ? (
+                      {role === 'admin' && isClient ? (
                         <th scope="col" class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">
                           Actions
                         </th>
@@ -287,7 +283,7 @@ const Tipe = ({ data }) => {
 
                             <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">{formatIDR(tipe.harga)}</td>
                             <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">{tipe.deskripsi}</td>
-                            {role === 'admin' ? (
+                            {role === 'admin' && isClient ? (
                               <td class="p-4 space-x-2 whitespace-nowrap">
                                 <button
                                   type="button"
@@ -331,7 +327,14 @@ const Tipe = ({ data }) => {
       </Sidebar>
 
       {/* Modal Add */}
-      <Modal isVisible={showModal} close={() => setShowModal(false)} judul={'add Tipe'}>
+      <Modal
+        isVisible={showModal}
+        close={() => {
+          setShowModal(false);
+          handleClearState();
+        }}
+        judul={'add Tipe'}
+      >
         <form onSubmit={saveProduct}>
           <div class="p-6 space-y-6">
             <div class="grid grid-cols-6 gap-6">
@@ -353,14 +356,10 @@ const Tipe = ({ data }) => {
                 <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Harga
                 </label>
-                <input
-                  type="text"
-                  name="first-name"
-                  id="first-name"
+                <CurrencyInput
                   value={harga}
-                  onChange={(e) => setHarga(e.target.value)}
-                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                  placeholder="Bonnie"
+                  onChange={(value) => setHarga(value)}
+                  className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                 />
               </div>
               <div class="col-span-6">
@@ -382,9 +381,9 @@ const Tipe = ({ data }) => {
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                         </svg>
                         <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                          <span class="font-semibold">Click to upload</span> or drag and drop
+                          <span class="font-semibold">Click to upload</span>
                         </p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">JPEG, PNG, JPG (MAX. 1MB)</p>
                       </>
                     )}
                   </div>
@@ -409,17 +408,25 @@ const Tipe = ({ data }) => {
 
           <div class="items-center p-6 border-t border-gray-200 rounded-b dark:border-gray-700">
             <button
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 disabled:bg-slate-600 disabled:text-zinc-200"
               type="submit"
+              disabled={!nama || !harga || !deskripsi || !foto}
             >
-              Add user
+              Add Tipe Kamar
             </button>
           </div>
         </form>
       </Modal>
 
       {/* Modal Edit */}
-      <Modal isVisible={showEdit} close={() => setEdit(false)} judul={'Edit Tipe'}>
+      <Modal
+        isVisible={showEdit}
+        close={() => {
+          setEdit(false);
+          handleClearState();
+        }}
+        judul={'Edit Tipe'}
+      >
         <form onSubmit={editProduct}>
           <div class="p-6 space-y-6">
             <div class="grid grid-cols-6 gap-6">
@@ -441,14 +448,10 @@ const Tipe = ({ data }) => {
                 <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Harga
                 </label>
-                <input
-                  type="text"
-                  name="first-name"
-                  id="first-name"
+                <CurrencyInput
                   value={harga}
-                  onChange={(e) => setHarga(e.target.value)}
-                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                  placeholder="Bonnie"
+                  onChange={(value) => setHarga(value)}
+                  className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                 />
               </div>
               <div class="col-span-6">
@@ -462,7 +465,7 @@ const Tipe = ({ data }) => {
                   <div class="flex flex-col items-center justify-center pt-5 pb-6">
                     {prev ? (
                       <div className="flex ">
-                        <img src={prev} alt="Prev Image" width={150} className="object-cover" />
+                        <img src={`http://localhost:8000/foto_tipe_kamar/${prev}`} alt="Prev Image" width={150} className="object-cover h-60" />
                       </div>
                     ) : (
                       <>
@@ -470,9 +473,9 @@ const Tipe = ({ data }) => {
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                         </svg>
                         <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                          <span class="font-semibold">Click to upload</span> or drag and drop
+                          <span class="font-semibold">Click to upload</span>
                         </p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">JPEG, PNG, JPG (MAX. 1MB)</p>
                       </>
                     )}
                   </div>
@@ -497,10 +500,11 @@ const Tipe = ({ data }) => {
 
           <div class="items-center p-6 border-t border-gray-200 rounded-b dark:border-gray-700">
             <button
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 disabled:bg-slate-600 disabled:text-zinc-200"
               type="submit"
+              disabled={!nama || !harga || !deskripsi || !foto}
             >
-              Add user
+              Update tipe
             </button>
           </div>
         </form>

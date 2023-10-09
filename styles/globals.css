@@ -20,3 +20,10 @@
 .rdrDefinedRangesWrapper {
   display: none;
 }
+
+@layer utilities {
+  .scrollbar-medium::-webkit-scrollbar {
+    width: 4px;
+    border-radius: 8px;
+  }
+}

@@ -1,0 +1,47 @@
+
+> front-end@0.1.0 build
+> next build
+
+- info Loaded env from D:\Folder Penting\FOLDER LATIHAN\Next Js\front-end\.env
+- info Linting and checking validity of types...
+- info Creating an optimized production build...
+- info Using wasm build of next-swc
+- warn Attempted to load @next/swc-win32-x64-gnu, but it was not installed
+- warn Attempted to load @next/swc-win32-x64-msvc, but an error occurred: \\?\D:\Folder Penting\FOLDER LATIHAN\Next Js\front-end\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a valid Win32 application.
+\\?\D:\Folder Penting\FOLDER LATIHAN\Next Js\front-end\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+- info Compiled successfully
+- info Collecting page data...
+- info Generating static pages (0/7)
+- info Generating static pages (1/7)
+- info Generating static pages (3/7)
+- info Generating static pages (5/7)
+- info Generating static pages (7/7)
+- info Finalizing page optimization...
+
+Route (pages)                              Size     First Load JS
+┌ λ /                                      593 B           172 kB
+├   /_app                                  0 B             110 kB
+├ λ /404                                   453 B           110 kB
+├ λ /admin                                 1.29 kB         173 kB
+├ λ /admin/kamar                           4.08 kB         175 kB
+├ λ /admin/tipe_kamar                      4.17 kB         175 kB
+├ λ /admin/transaksi                       3.71 kB         175 kB
+├ λ /admin/user                            4.51 kB         176 kB
+├ λ /api/hello                             0 B             110 kB
+├ ○ /booking/[id]                          2.1 kB          173 kB
+├ ○ /document                              2.06 kB         112 kB
+├ ○ /hotel                                 1.95 kB         173 kB
+├ ○ /hotel/[id]                            2.39 kB         174 kB
+├ ○ /login                                 285 B           171 kB
+├ ○ /transaction                           503 B           172 kB
+└ ○ /user                                  263 B           171 kB
++ First Load JS shared by all              121 kB
+  ├ chunks/framework-2c79e2a64abdb08b.js   45.2 kB
+  ├ chunks/main-8173c7f3c74689b0.js        29.7 kB
+  ├ chunks/pages/_app-70f452e82dc5c1b2.js  33.8 kB
+  ├ chunks/webpack-38cee4c0e358b1a3.js     862 B
+  └ css/a3a69bb654786ab2.css               11.3 kB
+
+λ  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
+○  (Static)  automatically rendered as static HTML (uses no initial props)
+

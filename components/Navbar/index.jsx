@@ -1,20 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LoginModal } from '../Modal';
 import { parseCookies, destroyCookie } from 'nookies';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Image from 'next/image';
+import axios from 'axios';
 
 const Navbar = () => {
   const [showModal, setShowModal] = useState(false);
-  const { token, email, nama, role, foto } = parseCookies();
+  const { token, email, nama, role, foto, id } = parseCookies();
   const [isClient, setIsClient] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState(null);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const getUser = async () => {
+    setIsLoading(true);
+    try {
+      const { token } = parseCookies();
+      const response = await axios.get(`http://localhost:8000/user/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      setData(response.data.data);
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, [id]);
 
   useEffect(() => {
     setIsClient(true);
@@ -29,39 +48,54 @@ const Navbar = () => {
     destroyCookie(null, 'email');
     router.push('/');
   };
+
   return (
     <>
-      <nav class="bg-white fixed w-full z-20 top-0 left-0 dark:border-gray-600">
-        <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-          <Link href="/" class="flex items-center">
+      <nav className="bg-white fixed w-full z-20 top-0 left-0 dark:border-gray-600">
+        <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+          <Link href="/" className="flex items-center">
             <Image src={'/logo/king.svg'} width={200} height={40} alt="logo" />
-            {/* <span class="self-center text-2xl font-semibold whitespace-nowrap">King Hotel</span> */}
+            {/* <span className="self-center text-2xl font-semibold whitespace-nowrap">King Hotel</span> */}
           </Link>
-          <div class="flex gap-x-2 md:order-2">
+          <div className="flex gap-x-2 md:order-2">
             {token && isClient ? (
-              <div class="flex items-center ml-3">
+              <div className="flex items-center ml-3">
                 <div>
-                  <button type="button" class="flex text-sm  focus:ring-gray-300 " onClick={toggleMenu}>
-                    <span class="sr-only">Open user menu</span>
-                    <img class="w-8 h-8 rounded-full" src={`http://localhost:8000/foto_user/${foto}`} alt="user photo" />
+                  <button type="button" className="flex text-sm  focus:ring-gray-300 " onClick={toggleMenu}>
+                    <span className="sr-only">Open user menu</span>
+                    {foto !== null ? (
+                      <Image className="w-8 h-8 rounded-full" src={`http://localhost:8000/foto_user/${data?.foto}`} width={32} height={32} alt="user photo" />
+                    ) : (
+                      <Image className="w-8 h-8 rounded-full" src="/image/default.jpg" width={32} height={32} alt="default user photo" />
+                    )}
                   </button>
                 </div>
                 {isMenuOpen && (
-                  <div class="z-50 my-4 text-base list-none absolute right-16 top-10 bg-white divide-y divide-gray-100 rounded shadow" id="dropdown">
-                    <div class="px-4 py-3" role="none">
-                      <p class="text-sm text-gray-900" role="none">
-                        {nama}
+                  <div className="z-50 my-4 text-base list-none absolute right-16 top-10 bg-white divide-y divide-gray-100 rounded shadow" id="dropdown">
+                    <div className="px-4 py-3" role="none">
+                      <p className="text-sm text-gray-900" role="none">
+                        {data?.nama_user}
                       </p>
-                      <p class="text-sm text-gray-900" role="none">
-                        {role}
+                      <p className="text-sm text-gray-900" role="none">
+                        {data?.role}
                       </p>
-                      <p class="text-sm font-medium text-gray-900 truncate" role="none">
-                        {email}
+                      <p className="text-sm font-medium text-gray-900 truncate" role="none">
+                        {data?.email}
                       </p>
                     </div>
-                    <ul class="py-1" role="none">
+                    <ul className="py-1" role="none">
                       <li>
-                        <a onClick={handleLogout} class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer dark:hover:text-white" role="menuitem">
+                        <a onClick={() => router.push(`/settings`)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer dark:hover:text-white" role="menuitem">
+                          Settings
+                        </a>
+                      </li>
+                      <li>
+                        <a onClick={() => router.push('/transaction')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer dark:hover:text-white" role="menuitem">
+                          Detail Transaksi
+                        </a>
+                      </li>
+                      <li>
+                        <a onClick={handleLogout} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer dark:hover:text-white" role="menuitem">
                           Sign out
                         </a>
                       </li>
@@ -71,12 +105,13 @@ const Navbar = () => {
               </div>
             ) : (
               <>
-                <button onClick={() => setShowModal(true)} type="button" class="text-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 border-blue-600 border font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0">
+                <button onClick={() => setShowModal(true)} type="button" className="text-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 border-blue-600 border font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0">
                   Login
                 </button>
                 <button
                   type="button"
-                  class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  onClick={() => router.push('/register')}
+                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 >
                   Sign In
                 </button>
@@ -86,49 +121,17 @@ const Navbar = () => {
             <button
               data-collapse-toggle="navbar-sticky"
               type="button"
-              class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+              className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
               aria-controls="navbar-sticky"
               aria-expanded="false"
             >
-              <span class="sr-only">Open main menu</span>
-              <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+              <span className="sr-only">Open main menu</span>
+              <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15" />
               </svg>
             </button>
           </div>
-          <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
-            <ul class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-transparent">
-              <li>
-                <a href="#" class="block py-2 pl-3 pr-4 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500" aria-current="page">
-                  Home
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  class="block py-2 pl-3 pr-4 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-blue-500 text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
-                >
-                  About
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  class="block py-2 pl-3 pr-4 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-blue-500 text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
-                >
-                  Services
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  class="block py-2 pl-3 pr-4 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-blue-500 text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
-                >
-                  Contact
-                </a>
-              </li>
-            </ul>
-          </div>
+          <div className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky"></div>
         </div>
       </nav>
       <LoginModal isVisible={showModal} close={() => setShowModal(false)} />
